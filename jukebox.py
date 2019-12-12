@@ -32,6 +32,7 @@ class DataListBox(Scrollbox):
         self.cursor = connection.cursor()
         self.table = table
         self.field = field
+        self.link_value = None
 
         self.bind('<<ListboxSelect>>', self.on_select)
 
@@ -49,6 +50,7 @@ class DataListBox(Scrollbox):
         widget.link_field = link_field
 
     def requery(self, link_value=None):
+        self.link_value = link_value  # stores the id, know the master record populated from
         if link_value and self.link_field:
             sql = self.sql_select + " WHERE " + self.link_field + "=?" + self.sql_sort
             print(sql)      # TODO delete this line
@@ -71,8 +73,17 @@ class DataListBox(Scrollbox):
             index = self.curselection()[0]
             value = self.get(index),
 
+            # 1. get id from db row
+            # 2. confirm its correct by including link_value when needed
+            if self.link_value:
+                value = value[0], self.link_value
+                sql_where = " WHERE " + self.field + "=? AND " + self.link_field + "=?"
+            else:
+                sql_where = " WHERE " + self.field + "=?"
             # get the artist ID from the database row
-            link_id = self.cursor.execute(self.sql_select + " WHERE " + self.field + "=?", value).fetchone()[1]
+            link_id = self.cursor.execute(self.sql_select + sql_where, value).fetchone()[1]
+
+            #  select name, _id from albums where name = 'Greatest Hits';
             self.linked_box.requery(link_id)
 
 
