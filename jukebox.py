@@ -76,6 +76,7 @@ class DataListBox(Scrollbox):
             self.linked_box.requery(link_id)
 
 
+#  so code isn't executed when the module is imported
 if __name__ == '__main__':
     conn = sqlite3.connect('music.sqlite')
 
